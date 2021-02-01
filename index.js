@@ -1,39 +1,15 @@
 const express = require('express')
+const bodyParser = require('body-parser')
 const mongoose = require('mongoose')
-
+const mongoDbConnectionString = require('./config/mongodb')
+const userRouter = require('./routes/user')
 const PORT = 4000;
 const app = express()
 
-const mongoDbConnectionString = require('./mongoDbConnectionString')
+app.use(bodyParser.urlencoded({ extended: true }))
+app.use(bodyParser.json())
 
-const user = { name: 'Daniel', password: '1234' }
-
-const UserSchema = new mongoose.Schema({
-    name: {
-        type: String,
-        required: true
-    },
-    password: {
-        type: String,
-        required: true
-    }
-})
-
-const Test = mongoose.model('Test', UserSchema)
-
-app.get('/users', (req, res) => {
-    res.send('bacana')
-})
-
-app.post('/users', (req, res) => {
-    Test.create(user)
-        .then(userPost => {
-            console.log(userPost)
-        })
-        .catch(err => {
-            console.log(err)
-        })
-})
+app.use('/users', userRouter)
 
 mongoose.
     connect(mongoDbConnectionString, {

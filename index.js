@@ -3,12 +3,16 @@ const bodyParser = require('body-parser')
 const mongoose = require('mongoose')
 const mongoDbConnectionString = require('./config/mongodb')
 const userRouter = require('./routes/user')
+const authRouter = require('./routes/auth')
+const authMiddleware = require('./middleware/auth')
 const PORT = 4000;
 const app = express()
 
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 
+app.use('/auth', authRouter)
+app.use('*', authMiddleware)
 app.use('/users', userRouter)
 
 mongoose.

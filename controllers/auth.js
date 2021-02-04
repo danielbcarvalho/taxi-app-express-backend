@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const jwtSecret = require('../config/jwtSecret')
 
-exports.loginUser = async (req, res) => {
+exports.loginUser = async (req, res, next) => {
     const { email, password } = req.body
 
     const user = await User.findOne({ email: email })
@@ -20,24 +20,24 @@ exports.loginUser = async (req, res) => {
     return res.send(`The email ${email} does not exist`)
 }
 
-exports.createUser = async (req, res) => {
+exports.createUser = async (req, res, next) => {
     try {
         const { name, email, password } = req.body
 
-        const hashedPassword = await bcrypt.hash(password, 12)
-
-        const checkEmail = await User.findOne({ email: email })
-
-        if (checkEmail) {
-            return res
-                .status(409)
-                .send(`An account withe the email ${email} already exists`)
+        if (await User.findOne({ email })) {
+            const error = new Error(
+                `An account with the mail ${email} already exists`
+            );
+            error.statusCode = 409;
+            throw error;
         }
+
+        const hashedPassword = await bcrypt.hash(password, 12)
 
         const user = new User({ name, email, password: hashedPassword });
         const result = await user.save();
         res.send(result)
     } catch (err) {
-        res.status(500).send(err)
+        next(err)
     }
 }

@@ -5,6 +5,7 @@ const mongoDbConnectionString = require('./config/mongodb')
 const userRouter = require('./routes/user')
 const authRouter = require('./routes/auth')
 const authMiddleware = require('./middleware/auth')
+const errorMiddleware = require('./middleware/error')
 const PORT = 4000;
 const app = express()
 
@@ -14,6 +15,7 @@ app.use(bodyParser.json())
 app.use('/auth', authRouter)
 app.use('*', authMiddleware)
 app.use('/users', userRouter)
+app.use(errorMiddleware)
 
 mongoose.
     connect(mongoDbConnectionString, {
